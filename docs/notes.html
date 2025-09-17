@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Notes - NotesTaker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header><a id="home" href="#">NotesTaker</a></header>
+
+<div class="search-bar">
+  <input type="text" id="noteSearch" placeholder="Search notes..." />
+</div>
+
+<div class="notes-container">
+  <h2>My Notes</h2>
+
+  <div id="notes-container" class="note">
+
+  </div>
+
+  <div class="center-box">
+    <h3 id="addNote"><a href="new-note.html">Add Note</a> </h3>
+  </div>
+</div>
+
+<footer><a id="logout" href="#">Log out</a> </footer>
+
+<script src="config.js"></script>
+<script>
+  const userToken = localStorage.getItem("userToken");
+  const container = document.getElementById("notes-container");
+
+  document.getElementById("home").addEventListener("click", function (e) {
+    e.preventDefault();
+
+    if (!userToken) {
+      window.location.href = "index.html";
+    } else {
+      window.location.href = "dashboard.html";
+    }
+  });
+
+  if (!userToken) {
+    alert("User not signed in!");
+    window.location.href = "signin.html";
+  } else {
+    container.innerHTML = "<p>Loading notes...</p>";
+    // const BASE_URL = import.meta.env.VITE_API_BASE_URL; // for Vite/ES Modules;
+    fetch(`${BASE_URL}/note/get-notes`, {
+      method: "GET",
+      headers: {"Content-Type": "application/json",
+                "Authorization": `Bearer ${userToken}`,
+        'ngrok-skip-browser-warning': 'true'},
+    })
+    .then(res => res.json())
+    .then(data => {
+      console.log("response", data);
+      if (String(data.noteAPIResponseCode) !== "200") {
+        throw new Error(data.noteAPIResponseData || "Failed to load notes.")
+      }
+
+      const notes = data.noteAPIResponseData;
+      // localStorage.setItem("userNotes", JSON.stringify(notes));
+      container.innerHTML = "";
+      renderNotes(notes);
+    })
+    .catch(err => {
+      // localStorage.removeItem("userNotes");
+      container.innerHTML = `<p class="error">Error: ${err.message}</p>`;
+    });
+  }
+
+  function renderNotes(notes) {
+    container.innerHTML = ""; // clear existing content
+
+    if (notes.length === 0) {
+      container.innerHTML = "<p>No notes found.<br>Share a thought here today...</p>";
+    } else {
+      notes.forEach(note => {
+        const noteDiv = document.createElement("div");
+        noteDiv.classList.add("note");
+        noteDiv.style.border = "1px solid #ccc";
+        noteDiv.style.padding = "1rem";
+        noteDiv.style.marginBottom = "1rem";
+        noteDiv.style.borderRadius = "10px";
+        noteDiv.style.backgroundColor = "#f9f9f9";
+
+        noteDiv.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h3 class="note-title" style="margin: 0;"><a href="note.html" style="text-decoration: none; color: #333;">${note.noteTitle}</a></h3>
+          <div class="note-actions" style="display: flex; gap: 0.5rem;">
+            <span class="edit-note" title="Edit" style="cursor: pointer; background-color: #4CAF50; color: white; padding: 0.3rem 0.5rem; border-radius: 5px;">✏️</span>
+            <span class="delete-note" title="Delete" style="cursor: pointer; background-color: #f44336; color: white; padding: 0.3rem 0.5rem; border-radius: 5px;">🗑️</span>
+          </div>
+        </div>
+        <p class="note-content" style="margin-top: 0.5rem;">${note.noteContent.replace(/\n/g, "<br>")}</p>
+        <small class="note-updated" style="color: #666;">Last updated: ${new Date(note.noteUpdatedAt).toLocaleString()}</small>`;
+
+        // Attach handlers
+        noteDiv.querySelector(".edit-note").addEventListener("click", () => {
+          console.log("Edit clicked for:", note);
+          localStorage.setItem("noteIdToBeEdited", note.noteId);
+          window.location.href = "note.html";
+        });
+
+        noteDiv.querySelector(".note-title").addEventListener("click", () => {
+          console.log("Edit clicked for:", note);
+          localStorage.setItem("noteIdToBeEdited", note.noteId);
+          window.location.href = "note.html";
+        });
+
+        noteDiv.querySelector(".delete-note").addEventListener("click", () => {
+          if (confirm("Are you sure you want to delete this note?")) {
+            deleteNote(note.noteId); // Needs to exist
+          }
+        });
+
+        container.appendChild(noteDiv);
+      });
+    }
+  }
+
+  function deleteNote(noteId) {
+
+    // const BASE_URL = import.meta.env.VITE_API_BASE_URL; // for Vite/ES Modules;
+    fetch(`${BASE_URL}/note/${noteId}`, {
+      method: 'DELETE',
+      headers: {"Content-Type": "application/json",
+                "Authorization": `Bearer ${userToken}`,
+        'ngrok-skip-browser-warning': 'true'},
+      body: JSON.stringify({
+        noteId: noteId
+      })
+    })
+    .then(res => {
+      return res.json().then(data => {
+        if (!res.ok) {
+          throw new Error(data.noteAPIResponseData || "Note failed to delete...\nTry again in a few minutes")
+        }
+        return data;
+      });
+    })
+    .then(data => {
+      console.log("Response", data);
+      alert("Note successfully deleted");
+      window.location.href = "notes.html";
+    })
+    .catch(err => alert(err.message));
+  }
+
+  document.getElementById("logout").addEventListener("click", function (e) {
+    e.preventDefault();
+
+    if (confirm("Are you sure you want to logout?")) {
+      localStorage.clear();
+      window.location.href = "index.html";
+    }
+
+  });
+
+  document.getElementById("noteSearch").addEventListener("keyup", function () {
+    const query = this.value.trim();
+
+    if (!query) {
+      // If search box is cleared, reload from localStorage
+      const cachedNotes = localStorage.getItem("userNotes");
+      if (cachedNotes) {
+        renderNotes(JSON.parse(cachedNotes));
+      }
+      return;
+    }
+
+    // const BASE_URL = import.meta.env.VITE_API_BASE_URL; // for Vite/ES Modules;
+    fetch(`${BASE_URL}/note/search?query=${encodeURIComponent(query)}`, {
+      method: "GET",
+      headers: {"Content-Type": "application/json",
+                "Authorization": `Bearer ${userToken}`,
+        'ngrok-skip-browser-warning': 'true'},
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (String(data.noteAPIResponseCode) !== "200") {
+        throw new Error(data.userAPIResponseData || "Search failed");
+      }
+
+      const notes = data.noteAPIResponseData;
+      renderNotes(notes);
+    })
+    .catch(err => {
+      container.innerHTML = `<p class="error">Search Error: ${err.message}</p>`;
+    });
+  });
+
+</script>
+
+</body>
+</html>

@@ -182,6 +182,11 @@ public class UserController {
         }
     }
 
+    @GetMapping("/test")
+    public String test() {
+        return "test";
+    }
+
     @GetMapping("/get-user")
     public ResponseEntity<UserAPIResponse<Object>> getUserById() {
         try {
@@ -207,7 +212,7 @@ public class UserController {
             UserAPIResponse<Object> errorResponse = UserAPIResponse.<Object>builder()
                     .userAPIResponseCode("500")
                     .userAPIResponseMessage("ERROR")
-                    .userAPIResponseData(e.getMessage())
+                    .userAPIResponseData("ERROR: "+e.getMessage())
                     .build();
 
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);

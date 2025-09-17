@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NotesTaker</title>
+<!--    <link href="https://fonts.cdnfonts.com/css/scary-monday" rel="stylesheet">-->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header><a href="index.html">NotesTaker</a></header>
+
+<div class="center-box">
+    <a href="signup.html">Sign Up</a>
+    <a href="signin.html">Sign In</a>
+</div>
+
+<!--<footer><a id="logout" href="#">Log out</a> </footer>-->
+
+<script src="config.js"></script>
+<script>
+    document.getElementById("logout").addEventListener("click", function (e) {
+        e.preventDefault();
+
+        localStorage.clear();
+        window.location.href = "index.html";
+    });
+</script>
+</body>
+</html>

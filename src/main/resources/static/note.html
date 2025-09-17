@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Notes - NotesTaker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header><a id="home" href="#">NotesTaker</a></header>
+
+<div class="notes-container">
+    <form id = "editNote">
+        <label for="title">Title</label>
+        <textarea id="title" name="title" class="title-box"></textarea>
+
+        <label for="content">Content</label>
+        <textarea id="content" name="content" class="content-box"></textarea>
+
+        <button type="submit">Edit Note</button>
+    </form>
+</div>
+
+<footer><a id="logout" href="#">Log out</a> </footer>
+<script src="config.js"></script>
+<script>
+
+    const userToken = localStorage.getItem("userToken");
+    const noteId = localStorage.getItem("noteIdToBeEdited");
+    localStorage.removeItem("noteIdToBeEdited")
+    console.log(noteId)
+
+    document.getElementById("home").addEventListener("click", function (e) {
+        e.preventDefault();
+
+        if (!userToken) {
+            window.location.href = "index.html";
+        } else {
+            window.location.href = "dashboard.html";
+        }
+
+    });
+
+    if (!noteId) {
+        alert("No note to edit... Returning to Notes...")
+        window.location.href = "notes.html";
+    } else {
+
+        // const BASE_URL = import.meta.env.VITE_API_BASE_URL; // for Vite/ES Modules;
+        fetch(`${BASE_URL}/note/get-note-by-id/${noteId}`, {
+            method: "GET",
+            headers: {"Content-Type": "application/json",
+                "Authorization": `Bearer ${userToken}`,
+                'ngrok-skip-browser-warning': 'true'}
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log("response", data);
+            if (String(data.noteAPIResponseCode) !== "200") {
+                throw new Error(data.noteAPIResponseData || "Failed to load notes.")
+            }
+
+            const notes = data.noteAPIResponseData;
+            document.getElementById("title").textContent = `${notes.noteTitle}`;
+            document.getElementById("content").textContent = `${notes.noteContent}`;
+            // container.innerHTML = "";
+            // renderNotes(notes);
+        })
+
+    }
+
+    document.getElementById("editNote").addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const title = document.getElementById("title").value;
+        const content = document.getElementById("content").value;
+        const submitBtn = this.querySelector("button[type='submit']");
+        // const notes = JSON.parse(localStorage.getItem("noteToBeEdited"));
+        // const noteId = localStorage.getItem("noteIdToBeEdited");
+        // const noteUserId = notes.noteUserId;
+        // localStorage.removeItem("noteToBeEdited")
+
+
+        // Disable button to prevent multiple clicks
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Submitting...";
+
+        // const BASE_URL = import.meta.env.VITE_API_BASE_URL; // for Vite/ES Modules;
+        fetch(`${BASE_URL}/note/update`, {
+            method: "PATCH",
+            headers: {"Content-Type": "application/json",
+                "Authorization": `Bearer ${userToken}`,
+                'ngrok-skip-browser-warning': 'true'},
+            body: JSON.stringify({
+                noteId: noteId,
+                noteTitle: title,
+                noteContent: content
+            })
+        })
+        .then(res => {
+            return res.json().then(data => {
+                if (!res.ok) {
+                    throw new Error(data.noteAPIResponseData || "Note could not be edited...\nTry again in a few minutes...");
+                }
+                return data;
+            });
+        })
+        .then(data => {
+            console.log("Full Response", data);
+            alert(data.noteAPIResponseMessage);
+            window.location.href = "notes.html";
+        })
+        .catch(err => {
+            alert(err.message);
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Edit Note";
+        });
+    });
+
+    document.getElementById("logout").addEventListener("click", function (e) {
+        e.preventDefault();
+
+        if (confirm("Are you sure you want to logout?")) {
+            localStorage.clear();
+            window.location.href = "index.html";
+        }
+
+    });
+
+    document.getElementById("home").addEventListener("click", function (e) {
+        e.preventDefault();
+
+        if (!userToken) {
+            window.location.href = "index.html";
+        } else {
+            window.location.href = "dashboard.html";
+        }
+
+    });
+</script>
+</body>
+</html>

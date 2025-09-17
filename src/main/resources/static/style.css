@@ -1,0 +1,192 @@
+@import url('https://fonts.cdnfonts.com/css/scary-monday');
+
+body {
+    background-color: beige;
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+header {
+    padding: 20px;
+    text-align: center;
+    font-size: 44px;
+    /*font-weight: bold;*/
+    font-family: 'Scary Monday', sans-serif;
+}
+
+footer {
+    text-align: center;
+    font-size: 40px;
+    font-family: 'Scary Monday', sans-serif;
+    padding-bottom: 40px; /* Optional: keeps space below if needed */
+}
+
+footer a {
+    text-decoration: none;
+    color: red;
+    background: none;
+    padding: 0;
+    border-radius: 0;
+    font-weight: 500;
+}
+
+footer a:hover {
+    background: none;
+    color: black;
+}
+
+.center-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 100px;
+    gap: 20px;
+}
+
+a {
+    text-decoration: none;
+    color: #333;
+    background-color: #e0e0e0;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: 500;
+}
+
+a:hover {
+    background-color: #d0d0d0;
+}
+
+.form-container {
+    width: 300px;
+    margin: 100px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.profile-container{
+    width: 600px;
+    margin: 100px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    text-align: left;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    text-align: left;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+input {
+    margin-bottom: 15px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button {
+    padding: 10px;
+    background-color: #444;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #333;
+}
+
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 120px;
+    gap: 20px;
+}
+
+.dashboard-link {
+    font-size: 1.2rem;
+    text-decoration: none;
+    color: #333;
+    background-color: #f0e6d2;
+    padding: 12px 24px;
+    border-radius: 6px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: background-color 0.3s ease;
+}
+
+.dashboard-link:hover {
+    background-color: #ddd0b4;
+}
+
+.notes-container {
+    max-width: 700px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #fff7e6;
+    border-radius: 8px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.note {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background-color: #fff;
+}
+
+.note-title {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    color: #444;
+}
+
+.note-content {
+    font-size: 1rem;
+    color: #555;
+}
+
+.title-box {
+    max-width: 300px;
+    /*height: 200px;*/
+    margin: 10px 0;
+    /*padding: 20px;*/
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+     /*text-align: center;*/
+}
+
+.content-box {
+    max-width: 700px;
+    height: 200px;
+    margin: 0 0 20px 0;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.search-bar {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#noteSearch {
+    padding: 10px;
+    width: 60%;
+    font-size: 16px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+}

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Profile - NotesTaker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header><a id="home" href="#">NotesTaker</a></header>
+
+<div class="profile-container">
+  <h2>User Profile</h2>
+
+  <div class="profile-info">
+<!--    <p id="Name"><strong>Name:</strong>Name!</p>-->
+<!--    <p id="Email"><strong>Email:</strong>Email!</p>-->
+    <p><strong>Name:</strong> <span id="Name">...</span></p>
+    <p><strong>Email:</strong> <span id="Email">...</span></p>
+
+  </div>
+
+  <div class="password-update">
+    <h3>Update Password</h3>
+    <form id="passwordForm">
+      <label for="oldPassword">Old Password</label>
+      <input type="password" id="oldPassword" name="oldPassword" required>
+
+      <label for="newPassword">New Password</label>
+      <input type="password" id="newPassword" name="newPassword" required>
+
+      <button type="submit">Update Password</button>
+    </form>
+  </div>
+</div>
+
+<footer><a id="logout" href="#">Log out</a> </footer>
+
+<script src="config.js"></script>
+<script>
+
+  const userToken = localStorage.getItem("userToken");
+  const userEmail = localStorage.getItem("userEmail");
+
+  if (!userToken) {
+    alert("User not signed in!");
+    window.location.href = "signin.html"; // Not signed in
+  }
+
+  // const BASE_URL = import.meta.env.VITE_API_BASE_URL; // for Vite/ES Modules;
+  fetch(`${BASE_URL}/user/get-user`, {
+    method: "GET",
+    headers: {"Content-Type": "application/json",
+      "Authorization": `Bearer ${userToken}`,
+      'ngrok-skip-browser-warning': 'true'},
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.userAPIResponseCode !== "200") {
+      throw new Error(data.userAPIResponseData || "Failed to get user.")
+    }
+    console.log(data)
+    const user = data.userAPIResponseData;
+    const userName = user.userName;
+    document.getElementById("Name").textContent = `${userName}`;
+  })
+  .catch(err => alert(err.message));
+
+  document.getElementById("Email").textContent = `${userEmail}`;
+
+  document.getElementById("passwordForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const oldPassword = document.getElementById("oldPassword").value;
+    const newPassword = document.getElementById("newPassword").value;
+    const submitBtn = this.querySelector("button[type='submit']");
+    // const userId = localStorage.getItem("userId");
+
+    // Disable button to prevent multiple clicks
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Submitting...";
+
+    // const BASE_URL = import.meta.env.VITE_API_BASE_URL; // for Vite/ES Modules;
+    fetch(`${BASE_URL}/user/update-password`, {
+      method: "PATCH",
+      headers: {"Content-Type": "application/json",
+        "Authorization": `Bearer ${userToken}`,
+        'ngrok-skip-browser-warning': 'true'},
+      body: JSON.stringify({
+        userOldPassword: oldPassword,
+        userNewPassword: newPassword
+      })
+    })
+    .then(res => {
+      return res.json().then(data => {
+        if (!res.ok) {
+          throw new Error(data.userAPIResponseData || "Password could not be updated...\nTry again in a few minutes...");
+        }
+        return data;
+      });
+    })
+    .then(data => {
+      console.log("Full Response", data);
+      alert(data.userAPIResponseMessage);
+      window.location.href = "profile.html";
+
+    })
+    .catch(err => {
+      alert(err.message);
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Update Password";
+    });
+    });
+
+  document.getElementById("logout").addEventListener("click", function (e) {
+    e.preventDefault();
+
+    if (confirm("Are you sure you want to logout?")) {
+      localStorage.clear();
+      window.location.href = "index.html";
+    }
+
+  });
+
+  document.getElementById("home").addEventListener("click", function (e) {
+    e.preventDefault();
+
+    if (!userToken) {
+      window.location.href = "index.html";
+    } else {
+      window.location.href = "dashboard.html";
+    }
+
+  });
+</script>
+
+</body>
+</html>

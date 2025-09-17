@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NotesTaker</title>
+  <!--    <link href="https://fonts.cdnfonts.com/css/scary-monday" rel="stylesheet">-->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header><a id="home" href="#">NotesTaker</a></header>
+
+<div class="notes-container">
+  <h2>New Note</h2>
+  <form id="addNote">
+    <label for="title">Title</label>
+    <textarea id="title" name="title" class="title-box"></textarea>
+
+    <label for="content">Content</label>
+    <textarea id="content" name="content" class="content-box"></textarea>
+
+    <button type="submit">Add Note</button>
+  </form>
+</div>
+
+<footer><a id="logout" href="#">Log out</a> </footer>
+<script src="config.js"></script>
+<script>
+
+  const userToken = localStorage.getItem("userToken");
+
+  document.getElementById("addNote").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const title = document.getElementById("title").value;
+    const content = document.getElementById("content").value;
+    const submitBtn = this.querySelector("button[type='submit']");
+    // const userId = localStorage.getItem("userId");
+
+    if (!userToken) {
+      alert("User not signed in!");
+      window.location.href = "signin.html"; // Not signed in
+      return;
+    }
+
+    // Disable button to prevent multiple clicks
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Submitting...";
+
+    // const BASE_URL = import.meta.env.VITE_API_BASE_URL; // for Vite/ES Modules;
+    fetch(`${BASE_URL}/note/create`, {
+      method: "POST",
+      headers: {"Content-Type": "application/json",
+                "Authorization": `Bearer ${userToken}`,
+        'ngrok-skip-browser-warning': 'true'},
+      body: JSON.stringify({
+        noteTitle: title,
+        noteContent: content
+      })
+    })
+    .then(res => {
+      return res.json().then(data => {
+        if (!res.ok) {
+          throw new Error(data.userAPIResponseData || "Note creation failed");
+        }
+        return data;
+      });
+    })
+    .then(data => {
+      console.log("Full response:", data);
+      alert("Note created successfully")
+      window.location.href = "notes.html";
+    })
+    .catch(err => {
+      alert(err.message);
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Add Note";
+    });
+  });
+
+  document.getElementById("logout").addEventListener("click", function (e) {
+    e.preventDefault();
+
+    if (confirm("Are you sure you want to logout?")) {
+      localStorage.clear();
+      window.location.href = "index.html";
+    }
+
+  });
+
+  document.getElementById("home").addEventListener("click", function (e) {
+    e.preventDefault();
+
+    if (!userToken) {
+      window.location.href = "index.html";
+    } else {
+      window.location.href = "dashboard.html";
+    }
+
+  });
+</script>
+</body>
+</html>

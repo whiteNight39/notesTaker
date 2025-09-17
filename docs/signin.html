@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sign In - NotesTaker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header><a href="index.html">NotesTaker</a></header>
+
+<div class="form-container">
+  <h2>Sign In</h2>
+  <form id="signinForm">
+    <label for="email">Email</label>
+    <input type="email" id="email" name="email" required>
+
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" required>
+
+    <button type="submit">Sign In</button>
+  </form>
+</div>
+
+<!--<footer><a id="logout" href="#">Log out</a> </footer>-->
+<script src="config.js"></script>
+<script>
+  document.getElementById("signinForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const submitBtn = this.querySelector("button[type='submit']");
+
+    // Disable button to prevent multiple clicks
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Signing In...";
+
+    // const BASE_URL = import.meta.env.VITE_API_BASE_URL; // for Vite/ES Modules
+    fetch(`${BASE_URL}/user/signin`, {
+      method: "POST",
+      headers: {"Content-Type": "application/json",
+        'ngrok-skip-browser-warning': 'true'},
+      body: JSON.stringify({
+        userEmail: email,
+        userPassword: password
+      })
+    })
+            .then(res => {
+              console.log("Raw response status:", res.status);
+              return res.json().then(data => {
+                console.log("Raw response body:", data);
+                if (!res.ok) throw new Error(data.userAPIResponseData || "Login failed");
+                return data;
+              });
+            })
+    .then(data => {
+      console.log("Full response:", data);
+
+      const user = data.userAPIResponseData; // ✅ Correct key from your JSON
+
+      if (!user || !user.userAuthJwtToken) {
+        throw new Error("Invalid server response");
+      }
+
+      localStorage.setItem("userToken", user.userAuthJwtToken);
+      // localStorage.setItem("userName", user.userName);
+      localStorage.setItem("userEmail", email)
+
+      window.location.href = "dashboard.html";
+    })
+    .catch(err => {
+      alert(err.message);
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Sign In";
+    });
+  });
+
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sign Up - NotesTaker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header><a href="index.html">NotesTaker</a></header>
+
+<div class="form-container">
+  <h2>Sign Up</h2>
+  <form id="signupForm">
+    <label for="name">Name</label>
+    <input type="text" id="name" name="name" required>
+
+    <label for="email">Email</label>
+    <input type="email" id="email" name="email" required>
+
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" required>
+
+    <button type="submit">Sign Up</button>
+  </form>
+</div>
+
+<!--<footer><a id="logout" href="#">Log out</a> </footer>-->
+<script src="config.js"></script>
+<script>
+  document.getElementById("signupForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const name = document.getElementById("name").value;
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const submitBtn = this.querySelector("button[type='submit']");
+
+    // Disable button to prevent multiple clicks
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Creating Account...";
+
+    // const BASE_URL = import.meta.env.VITE_API_BASE_URL; // for Vite/ES Modules;
+    fetch(`${BASE_URL}/user/create`, {
+      method: "POST",
+      headers: {"Content-Type": "application/json",
+        'ngrok-skip-browser-warning': 'true'},
+      body: JSON.stringify({
+        userName: name,
+        userEmail: email,
+        userPassword: password
+      })
+    })
+    .then(res => {
+      console.log("Raw response status:", res.status);
+      return res.json().then(data => {
+        if (!res.ok) {
+          throw new Error(data.userAPIResponseData || "Sign-up Failed");
+        }
+        return data;
+      });
+    })
+    .then(data => {
+      console.log("Full Response", data);
+      alert("Signup successful! Redirecting to login...");
+      window.location.href = "signin.html";
+    })
+    .catch(err => {
+      alert(err.message);
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Sign Up";
+    });
+  });
+</script>
+
+</body>
+</html>

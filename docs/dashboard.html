@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - NotesTaker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header><a id="home" href="#">NotesTaker</a></header>
+
+<h2 id="welcome">Welcome, ...</h2>
+
+<main class="dashboard-container">
+  <a href="notes.html" class="dashboard-link" id= "getNotes">📝 Notes</a>
+  <a href="profile.html" class="dashboard-link">👤 Profile</a>
+</main>
+
+<footer><a id="logout" href="#">Log out</a> </footer>
+
+<script src="config.js"></script>
+<script>
+  const userToken = localStorage.getItem("userToken");
+
+  if (!userToken) {
+    alert("User not signed in!");
+    window.location.href = "signin.html"; // Not signed in
+  } else {
+
+    // const BASE_URL = import.meta.env.VITE_API_BASE_URL; // for Vite/ES Modules
+    fetch(`${BASE_URL}/user/get-user`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${userToken}`,
+        'ngrok-skip-browser-warning': 'true'
+      }
+    })
+            .then(async res => {
+              const text = await res.text(); // raw body
+              console.log("Raw response:", text); // 🐞 debug!
+
+              let data;
+              try {
+                data = JSON.parse(text);
+              } catch (err) {
+                throw new Error("Server returned non-JSON response. Possibly an HTML error page.");
+              }
+
+              if (!res.ok) {
+                throw new Error(data.userAPIResponseData || "Login failed");
+              }
+
+              return data;
+            })
+    .then(data => {
+      console.log("User data:", data);
+      if (data.userAPIResponseCode !== "200") {
+        throw new Error(data.userAPIResponseData || "Failed to get user.");
+      }
+      // console.log("User data:", data);
+      const user = data.userAPIResponseData;
+      const userName = user.userName;
+      document.getElementById("welcome").textContent = `Welcome, ${userName}`;
+    })
+    .catch(err => alert(err.message));
+  }
+
+  document.getElementById("logout").addEventListener("click", function (e) {
+    e.preventDefault();
+
+    if (confirm("Are you sure you want to logout?")) {
+      localStorage.clear();
+      window.location.href = "index.html";
+    }
+
+  });
+</script>
+
+</body>
+</html>
